@@ -28,3 +28,20 @@ class MovieSerializer(serializers.Serializer):
         instance.save()
 
         return instance
+
+    def validate(self, attrs):
+        """Validate object"""
+
+        if attrs["name"] == attrs["descripiton"]:
+            raise serializers.ValidationError(
+                "Name and descripiton can't be same")
+
+        return attrs
+
+    def validate_name(self, value):
+        """Validate Name input"""
+
+        if len(value) < 3:
+            raise serializers.ValidationError("Name Is Too short")
+
+        return value
