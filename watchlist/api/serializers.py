@@ -2,11 +2,19 @@ from watchlist.models import Movie
 from rest_framework import serializers
 
 
+def is_four_char_str(attrs):
+    """validate string to have at leat 4 charecter"""
+
+    if len(attrs) < 4:
+        raise serializers.ValidationError(
+            "Should be at least 4 char long")
+
+
 class MovieSerializer(serializers.Serializer):
     """Serializes Movie data"""
 
     id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField()
+    name = serializers.CharField(validators=[is_four_char_str])
     descripiton = serializers.CharField()
     active = serializers.BooleanField()
 
@@ -38,10 +46,12 @@ class MovieSerializer(serializers.Serializer):
 
         return attrs
 
-    def validate_name(self, value):
-        """Validate Name input"""
+    # its field level validator but there is a better solution for this
+    # and I used that solution for name validation
+    # def validate_name(self, value):
+    #     """Validate Name input"""
 
-        if len(value) < 3:
-            raise serializers.ValidationError("Name Is Too short")
+    #     if len(value) < 3:
+    #         raise serializers.ValidationError("Name Is Too short")
 
-        return value
+    #     return value
