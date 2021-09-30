@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework import status
 from watchlist.models import Movie
-from .serializers import MovieSerializer
+from .serializers import MovieSerializer, MovieModelSerializer
 
 
 class Movies(APIView):
@@ -15,12 +15,12 @@ class Movies(APIView):
         except Movie.DoesNotExist:
             return Response({"Error": "Movie Does Not Exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        serialized_data = MovieSerializer(movies, many=True)
+        serialized_data = MovieModelSerializer(movies, many=True)
 
         return Response(serialized_data.data)
 
     def post(self, request):
-        serialized_data = MovieSerializer(data=request.data)
+        serialized_data = MovieModelSerializer(data=request.data)
 
         if serialized_data.is_valid():
             serialized_data.save()
@@ -40,7 +40,7 @@ class MovieDetail(APIView):
         except Movie.DoesNotExist:
             return Response({"Error": "Movie Does Not Exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        serialized_data = MovieSerializer(movie)
+        serialized_data = MovieModelSerializer(movie)
 
         return Response(serialized_data.data)
 
@@ -51,7 +51,7 @@ class MovieDetail(APIView):
         except Movie.DoesNotExist:
             return Response({"Error": "Movie Does Not Exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        serialized_data = MovieSerializer(movie, data=request.data)
+        serialized_data = MovieModelSerializer(movie, data=request.data)
         if serialized_data.is_valid():
             serialized_data.save()
             return Response(serialized_data.data)
