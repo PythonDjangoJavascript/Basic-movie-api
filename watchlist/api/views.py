@@ -107,3 +107,47 @@ class StreamPlatformAPIView(APIView):
         return Response(
             serialized_data.errors, status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class StreamPlatformDetialAPIView(APIView):
+    """Manages Stream Platform Detail Api Responses"""
+
+    def get(self, request, pk):
+        try:
+            platform = StreamPlatform.objects.get(pk=pk)
+        except StreamPlatform.DoesNotExist:
+            Response({
+                "Error": "Platform not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+        # if found the platfor with pk
+        serialized_data = StreamPlatformSerializer(platform)
+        return Response(serialized_data.data)
+
+    def put(self, request, pk):
+        try:
+            platform = StreamPlatform.objects.get(pk=pk)
+        except StreamPlatform.DoesNotExist:
+            return Response({
+                "Error": "Does not exist",
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # when object found with pk
+        serialized_data = StreamPlatformSerializer(platform, data=request.data)
+        if serialized_data.is_valid():
+            serialized_data.save()
+            return Response(serialized_data.data)
+        return Response(
+            serialized_data.errors, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def delete(self, request, pk):
+        try:
+            platform = StreamPlatform.objects.get(pk=pk)
+        except StreamPlatform.DoesNotExist:
+            return Response({
+                "Error": "Does not exist",
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # when object found with pk
+        StreamPlatform.delete(platform)
+        return Response(status=status.HTTP_204_NO_CONTENT)

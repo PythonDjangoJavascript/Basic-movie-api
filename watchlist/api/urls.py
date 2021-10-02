@@ -7,6 +7,6 @@ urlpatterns = [
     path("<int:pk>/", views.WatchDetailAPIView.as_view(), name="movie-detail"),
     path("stream-platforms/", views.StreamPlatformAPIView.as_view(),
          name="stream-platform"),
-    # path("stream-platforms/<int:pk>/",
-    #      views.StreamPlatformAPIView.as_view(), name="stream-detail"),
+    path("stream-platforms/<int:pk>/",
+         views.StreamPlatformDetialAPIView.as_view(), name="stream-detail"),
 ]
