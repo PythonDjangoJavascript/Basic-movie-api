@@ -13,6 +13,14 @@ class WatchlistSerializer(serializers.ModelSerializer):
 class StreamPlatformSerializer(serializers.ModelSerializer):
     """Serializes Sream platform model"""
 
+    watchlist = WatchlistSerializer(many=True, read_only=True)
+    # watchlist = serializers.StringRelatedField(many=True)
+    # watchlist = serializers.HyperlinkedRelatedField(
+    #     many=True,
+    #     read_only=True,
+    #     view_name='movie-detail'
+    # )
+
     class Meta:
         model = StreamPlatform
         fields = '__all__'

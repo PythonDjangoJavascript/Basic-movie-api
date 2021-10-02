@@ -20,7 +20,8 @@ class WatchlistAPIView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
         # serealize data if found
-        serialized_data = WatchlistSerializer(watchlist, many=True)
+        serialized_data = WatchlistSerializer(
+            watchlist, many=True)
 
         return Response(serialized_data.data)
 
@@ -95,7 +96,8 @@ class StreamPlatformAPIView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
         # if found
-        serialized_data = StreamPlatformSerializer(platforms, many=True)
+        serialized_data = StreamPlatformSerializer(
+            platforms, many=True, context={'request': request})
         return Response(serialized_data.data)
 
     def post(self, request):
@@ -116,7 +118,7 @@ class StreamPlatformDetialAPIView(APIView):
         try:
             platform = StreamPlatform.objects.get(pk=pk)
         except StreamPlatform.DoesNotExist:
-            Response({
+            return Response({
                 "Error": "Platform not found"
             }, status=status.HTTP_404_NOT_FOUND)
         # if found the platfor with pk
