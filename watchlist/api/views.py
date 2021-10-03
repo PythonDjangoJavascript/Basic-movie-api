@@ -1,8 +1,10 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import (
     status, mixins, generics
 )
+from rest_framework.viewsets import ViewSet
 
 from watchlist.models import Review, WatchList, StreamPlatform
 from watchlist.api.serializers import (
@@ -13,7 +15,6 @@ from watchlist.api.serializers import (
 class ReviewListAPIView(generics.ListCreateAPIView):
     """Response review list and create review"""
 
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
@@ -138,7 +139,23 @@ class WatchDetailAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# StreamPlatform APIViews
+# StreamPlatform
+class StreamPlatformViewSets(ViewSet):
+    """Manages stream api response list and detail"""
+
+    def list(self, request):
+        # Get Request
+        queryset = StreamPlatform.objects.all()
+        serializer = StreamPlatformSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        # Get Detail View
+        queryset = StreamPlatform.objects.all()
+        platform_single = get_object_or_404(queryset, pk=pk)
+        serialized_data = StreamPlatformSerializer(platform_single)
+        return Response(serialized_data.data)
+
 
 class StreamPlatformAPIView(APIView):
     """Manages Strea platform api views responses"""
