@@ -5,13 +5,17 @@ from rest_framework import serializers
 class ReviewSerializer(serializers.ModelSerializer):
     """Serializes Reivew model fields"""
 
+    watchlist = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = Review
         fields = '__all__'
+        read_only_fields = ('active',)
 
 
 class WatchlistSerializer(serializers.ModelSerializer):
     """Serializes Watchlist model"""
+
     reviews = ReviewSerializer(many=True, read_only=True)
 
     class Meta:

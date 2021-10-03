@@ -10,30 +10,58 @@ from watchlist.api.serializers import (
 )
 
 
-class ReviewListAPIView(mixins.ListModelMixin,
-                        mixins.CreateModelMixin,
-                        generics.GenericAPIView):
-    """Return reviews list and create a new Review"""
+class ReviewListAPIView(generics.ListCreateAPIView):
+    """Response review list and create review"""
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    def get_queryset(self):
+        """Overriding queryset to perform fetch review operation only for
+        selected movie"""
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+        # filter query only for selected movie
+        queryset = Review.objects.filter(watchlist=self.kwargs['pk'])
+        return queryset
+
+    def perform_create(self, serializer):
+        """Overriding create method to create reviews only for selected movie"""
+
+        selected_movie = WatchList.objects.get(pk=self.kwargs.get('pk'))
+
+        serializer.save(watchlist=selected_movie)
+
+# class ReviewListAPIView(mixins.ListModelMixin,
+#                         mixins.CreateModelMixin,
+#                         generics.GenericAPIView):
+#     """Return reviews list and create a new Review"""
+
+#     queryset = Review.objects.all()
+#     serializer_class = ReviewSerializer
+
+#     def get(self, request, *args, **kwargs):
+#         return self.list(request, *args, **kwargs)
+
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, *args, **kwargs)
 
 
-class ReviewDetailAPIView(mixins.RetrieveModelMixin, generics.GenericAPIView):
-    """Response Movie Review Detail"""
+class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """Retrieve Reveiw detail through get request and update and delete 
+    existing review"""
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
-    def get(self, request, *args, **kwargs):
-        """Returns reviews detail response and allow get request"""
-        return self.retrieve(request, *args, **kwargs)
+# class ReviewDetailAPIView(mixins.RetrieveModelMixin, generics.GenericAPIView):
+#     """Response Movie Review Detail"""
+
+#     queryset = Review.objects.all()
+#     serializer_class = ReviewSerializer
+
+#     def get(self, request, *args, **kwargs):
+#         """Returns reviews detail response and allow get request"""
+#         return self.retrieve(request, *args, **kwargs)
 
 
 class WatchlistAPIView(APIView):
