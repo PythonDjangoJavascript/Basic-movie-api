@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework import (
     status, mixins, generics
 )
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ViewSet, ModelViewSet
 
 from watchlist.models import Review, WatchList, StreamPlatform
 from watchlist.api.serializers import (
@@ -140,7 +140,13 @@ class WatchDetailAPIView(APIView):
 
 
 # StreamPlatform
-class StreamPlatformViewSets(ViewSet):
+class StreamPlatformViewSets(ModelViewSet):
+    """Manages crud responses on stram object"""
+    queryset = StreamPlatform.objects.all()
+    serializer_class = StreamPlatformSerializer
+
+
+class StreamPlatformViewSetsOLD(ViewSet):
     """Manages stream api response list and detail"""
 
     def list(self, request):
@@ -155,6 +161,15 @@ class StreamPlatformViewSets(ViewSet):
         platform_single = get_object_or_404(queryset, pk=pk)
         serialized_data = StreamPlatformSerializer(platform_single)
         return Response(serialized_data.data)
+
+    def create(self, request):
+        # crate new stramPlatform obj
+        serialized_data = StreamPlatformSerializer(data=request.data)
+        if serialized_data.is_valid():
+            # Save the model
+            serialized_data.save()
+            return Response(serialized_data.data)
+        return Response(serialized_data.errors)
 
 
 class StreamPlatformAPIView(APIView):
