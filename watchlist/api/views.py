@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import (
@@ -18,6 +19,17 @@ class ReviewListAPIView(generics.ListCreateAPIView):
     """Response review list and create review"""
 
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update_movie_reivew_count(self, movie_obj, rating):
+        """Update movie object with provided raring"""
+        try:
+            movie_obj.total_reviews += 1
+            movie_obj.avg_rating = (
+                movie_obj.avg_rating + rating)/movie_obj.total_reviews
+            movie_obj.save()
+        except Exception as e:
+            raise ValidationError("Could not update the rating!")
 
     def get_queryset(self):
         """Overriding queryset to perform fetch review operation only for
@@ -39,6 +51,11 @@ class ReviewListAPIView(generics.ListCreateAPIView):
         if logged_user_query.exists():
             raise ValidationError("You already reviewed this Movie!")
 
+        # now update movie obj ratings detail
+        rating = serializer.validated_data['rating']
+        self.update_movie_reivew_count(selected_movie, rating)
+
+        # Save Review
         serializer.save(watchlist=selected_movie,
                         review_user=logged_user)
 
