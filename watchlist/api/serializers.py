@@ -5,6 +5,7 @@ from rest_framework import serializers
 class ReviewSerializer(serializers.ModelSerializer):
     """Serializes Reivew model fields"""
 
+    review_user = serializers.StringRelatedField()
     watchlist = serializers.StringRelatedField(read_only=True)
 
     class Meta:

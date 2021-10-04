@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
@@ -29,6 +30,7 @@ class WatchList(models.Model):
 class Review(models.Model):
     """Define Movie review data model"""
 
+    review_user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.PositiveBigIntegerField(
         validators=[MaxValueValidator(5), MinValueValidator(1), ])
     message = models.CharField(max_length=200)

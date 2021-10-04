@@ -5,6 +5,7 @@ from rest_framework import (
     status, mixins, generics
 )
 from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework.exceptions import ValidationError
 
 from watchlist.models import Review, WatchList, StreamPlatform
 from watchlist.api.serializers import (
@@ -22,15 +23,23 @@ class ReviewListAPIView(generics.ListCreateAPIView):
         selected movie"""
 
         # filter query only for selected movie
-        queryset = Review.objects.filter(watchlist=self.kwargs['pk'])
+        queryset = Review.objects.filter(
+            watchlist=self.kwargs['pk'])
         return queryset
 
     def perform_create(self, serializer):
         """Overriding create method to create reviews only for selected movie"""
-
+        logged_user = self.request.user
         selected_movie = WatchList.objects.get(pk=self.kwargs.get('pk'))
 
-        serializer.save(watchlist=selected_movie)
+        # youser arleady reviewed?
+        logged_user_query = Review.objects.filter(
+            watchlist=selected_movie, review_user=logged_user)
+        if logged_user_query.exists():
+            raise ValidationError("You already reviewed this Movie!")
+
+        serializer.save(watchlist=selected_movie,
+                        review_user=logged_user)
 
 # class ReviewListAPIView(mixins.ListModelMixin,
 #                         mixins.CreateModelMixin,
@@ -53,6 +62,10 @@ class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    # def get_queryset(slef):
+    #     # Overriding query method to include user
+
 
 # class ReviewDetailAPIView(mixins.RetrieveModelMixin, generics.GenericAPIView):
 #     """Response Movie Review Detail"""
