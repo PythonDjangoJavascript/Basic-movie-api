@@ -7,6 +7,7 @@ from rest_framework import (
 from rest_framework.viewsets import ViewSet, ModelViewSet
 from rest_framework.exceptions import ValidationError
 
+from watchlist.api.permissions import AdminOrReadOnly, ReviewOwnerOrReadOnly
 from watchlist.models import Review, WatchList, StreamPlatform
 from watchlist.api.serializers import (
     ReviewSerializer, WatchlistSerializer, StreamPlatformSerializer
@@ -59,6 +60,8 @@ class ReviewListAPIView(generics.ListCreateAPIView):
 class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """Retrieve Reveiw detail through get request and update and delete 
     existing review"""
+
+    permission_classes = [ReviewOwnerOrReadOnly, ]
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
@@ -188,6 +191,8 @@ class StreamPlatformViewSetsOLD(ViewSet):
 class StreamPlatformAPIView(APIView):
     """Manages Strea platform api views responses"""
 
+    permission_classes = [AdminOrReadOnly, ]
+
     def get(self, request):
         try:
             platforms = StreamPlatform.objects.all()
@@ -214,6 +219,8 @@ class StreamPlatformAPIView(APIView):
 
 class StreamPlatformDetialAPIView(APIView):
     """Manages Stream Platform Detail Api Responses"""
+
+    permission_classes = [AdminOrReadOnly, ]
 
     def get(self, request, pk):
         try:
