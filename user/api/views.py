@@ -28,3 +28,15 @@ def user_registration_view(request):
 
         return Response({'Error': serialized_data.errors, },
                         status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def logout_view(request):
+    """Logout and delete token"""
+
+    if request.method == 'POST':
+        try:
+            request.user.auth_token.delete()
+            return Response({"message": "Succesfully logged out"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": "Invalid Request"}, status=status.HTTP_400_BAD_REQUEST)

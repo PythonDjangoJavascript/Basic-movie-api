@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import (
@@ -19,7 +20,8 @@ class ReviewListAPIView(generics.ListCreateAPIView):
     """Response review list and create review"""
 
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
 
     def update_movie_reivew_count(self, movie_obj, rating):
         """Update movie object with provided raring"""
@@ -101,6 +103,8 @@ class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 class WatchlistAPIView(APIView):
     """Response with watch list data"""
 
+    permission_classes = [AdminOrReadOnly, ]
+
     def get(self, request):
         try:
             watchlist = WatchList.objects.all()
@@ -128,6 +132,8 @@ class WatchlistAPIView(APIView):
 
 class WatchDetailAPIView(APIView):
     """Returns Movie Detail from wathlist"""
+
+    permission_classes = [AdminOrReadOnly, ]
 
     def get(self, request, pk):
         """Returns Movie detail"""
