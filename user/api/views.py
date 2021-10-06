@@ -1,4 +1,5 @@
 from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,9 +20,20 @@ def user_registration_view(request):
             # token = Token.objects.get_or_create(user=user)
             # print(f'------------------{token}--------------')
             # print(f'------------------{token[0].key}--------------')
+            # data = {
+            #     **serialized_data.data,
+            #     'Token': Token.objects.get(user=user).key
+            # }
+
+            # To Create and send new JWT auth token
+            refresh = RefreshToken.for_user(user)
+
             data = {
                 **serialized_data.data,
-                'Token': Token.objects.get(user=user).key
+                'Token': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
             }
 
             return Response(data, status=status.HTTP_201_CREATED)

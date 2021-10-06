@@ -43,4 +43,4 @@ class Review(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"({self.rating}): {self.watchlist.title}"
+        return f"({self.rating}): {self.watchlist.title} by {self.review_user.username}"

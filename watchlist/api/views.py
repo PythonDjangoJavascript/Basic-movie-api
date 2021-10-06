@@ -20,8 +20,8 @@ class ReviewListAPIView(generics.ListCreateAPIView):
     """Response review list and create review"""
 
     serializer_class = ReviewSerializer
-    # permission_classes = [IsAuthenticated]
-    permission_classes = [IsAuthenticatedOrReadOnly, ]
+    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticatedOrReadOnly, ]
 
     def update_movie_reivew_count(self, movie_obj, rating):
         """Update movie object with provided raring"""
