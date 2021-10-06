@@ -1,19 +1,21 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticated, IsAuthenticatedOrReadOnly)
+from rest_framework.throttling import (
+    UserRateThrottle, AnonRateThrottle, ScopedRateThrottle)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import (
-    status, mixins, generics
-)
+    status, mixins, generics)
 from rest_framework.viewsets import ViewSet, ModelViewSet
 from rest_framework.exceptions import ValidationError
 
 from watchlist.api.permissions import AdminOrReadOnly, ReviewOwnerOrReadOnly
 from watchlist.models import Review, WatchList, StreamPlatform
 from watchlist.api.serializers import (
-    ReviewSerializer, WatchlistSerializer, StreamPlatformSerializer
-)
+    ReviewSerializer, WatchlistSerializer, StreamPlatformSerializer)
+from watchlist.api.throttling import *
 
 
 class ReviewListAPIView(generics.ListCreateAPIView):
@@ -22,6 +24,7 @@ class ReviewListAPIView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated]
     # permission_classes = [IsAuthenticatedOrReadOnly, ]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def update_movie_reivew_count(self, movie_obj, rating):
         """Update movie object with provided raring"""
@@ -81,6 +84,7 @@ class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     existing review"""
 
     permission_classes = [ReviewOwnerOrReadOnly, ]
+    throttle_classes = [UserReviewDetailThrottle, ]
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
@@ -134,6 +138,7 @@ class WatchDetailAPIView(APIView):
     """Returns Movie Detail from wathlist"""
 
     permission_classes = [AdminOrReadOnly, ]
+    throttle_classes = [WatchDetailThrottle, ]
 
     def get(self, request, pk):
         """Returns Movie detail"""
@@ -244,6 +249,8 @@ class StreamPlatformDetialAPIView(APIView):
     """Manages Stream Platform Detail Api Responses"""
 
     permission_classes = [AdminOrReadOnly, ]
+    throttle_classes = [ScopedRateThrottle, ]
+    throttle_scope = 'stream-detail'
 
     def get(self, request, pk):
         try:

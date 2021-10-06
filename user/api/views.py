@@ -17,24 +17,24 @@ def user_registration_view(request):
         print(request.data)
         if serialized_data.is_valid():
             user = serialized_data.save()
-            # token = Token.objects.get_or_create(user=user)
-            # print(f'------------------{token}--------------')
-            # print(f'------------------{token[0].key}--------------')
-            # data = {
-            #     **serialized_data.data,
-            #     'Token': Token.objects.get(user=user).key
-            # }
-
-            # To Create and send new JWT auth token
-            refresh = RefreshToken.for_user(user)
-
+            token = Token.objects.get_or_create(user=user)
+            print(f'------------------{token}--------------')
+            print(f'------------------{token[0].key}--------------')
             data = {
                 **serialized_data.data,
-                'Token': {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                }
+                'Token': Token.objects.get(user=user).key
             }
+
+            # To Create and send new JWT auth token
+            # refresh = RefreshToken.for_user(user)
+
+            # data = {
+            #     **serialized_data.data,
+            #     'Token': {
+            #         'refresh': str(refresh),
+            #         'access': str(refresh.access_token),
+            #     }
+            # }
 
             return Response(data, status=status.HTTP_201_CREATED)
 
