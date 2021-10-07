@@ -20,7 +20,10 @@ urlpatterns = [
     path('', include(router.urls)),
     path("watchlist/<int:pk>/reviews/",
          views.ReviewListAPIView.as_view(), name="movie-reviews"),
+    path('watchlist-filter/', views.WatchListFilterAPIView.as_view(),
+         name="watchlist-filter"),
     #     path("reviews/", views.ReviewListAPIView.as_view(), name="reviews"),
     path("reviews/<int:pk>/", views.ReviewDetailAPIView.as_view(),
          name="review-detail"),
+    path("user-reviews/", views.UserReview.as_view(), name="user-review"),
 ]

@@ -17,9 +17,9 @@ def user_registration_view(request):
         print(request.data)
         if serialized_data.is_valid():
             user = serialized_data.save()
-            token = Token.objects.get_or_create(user=user)
-            print(f'------------------{token}--------------')
-            print(f'------------------{token[0].key}--------------')
+            # token = Token.objects.get_or_create(user=user)
+            # print(f'------------------{token}--------------')
+            # print(f'------------------{token[0].key}--------------')
             data = {
                 **serialized_data.data,
                 'Token': Token.objects.get(user=user).key

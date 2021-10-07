@@ -18,6 +18,8 @@ class WatchlistSerializer(serializers.ModelSerializer):
     """Serializes Watchlist model"""
 
     reviews = ReviewSerializer(many=True, read_only=True)
+    # platform = serializers.CharField(source='platform.name')
+    platform = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = WatchList

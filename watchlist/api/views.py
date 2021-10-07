@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
+from rest_framework import filters
 from rest_framework.permissions import (
     IsAuthenticated, IsAuthenticatedOrReadOnly)
 from rest_framework.throttling import (
@@ -11,11 +12,34 @@ from rest_framework import (
 from rest_framework.viewsets import ViewSet, ModelViewSet
 from rest_framework.exceptions import ValidationError
 
+from django_filters.rest_framework import DjangoFilterBackend
+
 from watchlist.api.permissions import AdminOrReadOnly, ReviewOwnerOrReadOnly
 from watchlist.models import Review, WatchList, StreamPlatform
 from watchlist.api.serializers import (
     ReviewSerializer, WatchlistSerializer, StreamPlatformSerializer)
 from watchlist.api.throttling import *
+
+
+class UserReview(generics.ListAPIView):
+    """Returns all reivews posted by a user"""
+    serializer_class = ReviewSerializer
+    permission_classes = [AdminOrReadOnly]
+
+    # def get_queryset(self):
+    #     """Filter query by user info form url argument"""
+
+    #     username = self.kwargs['username']
+    #     return Review.objects.filter(review_user__username = username)
+
+    def get_queryset(self):
+        """Filter query by username from query params"""
+
+        username = self.request.query_params.get('username', None)
+
+        if username is not None:
+            return Review.objects.filter(review_user__username=username)
+        raise ValidationError("Username Not Found", status.HTTP_404_NOT_FOUND)
 
 
 class ReviewListAPIView(generics.ListCreateAPIView):
@@ -102,6 +126,18 @@ class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 #     def get(self, request, *args, **kwargs):
 #         """Returns reviews detail response and allow get request"""
 #         return self.retrieve(request, *args, **kwargs)
+
+
+class WatchListFilterAPIView(generics.ListAPIView):
+    """Response Filtered Movielist"""
+
+    queryset = WatchList.objects.all()
+    serializer_class = WatchlistSerializer
+    filter_backends = [DjangoFilterBackend,
+                       filters.SearchFilter, filters.OrderingFilter]
+    filter_fields = ['title', 'platform__name', ]
+    search_fields = ['title', ]
+    ordering_fields = ['avg_rating', ]
 
 
 class WatchlistAPIView(APIView):
