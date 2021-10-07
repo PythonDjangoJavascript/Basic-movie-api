@@ -19,6 +19,11 @@ from watchlist.models import Review, WatchList, StreamPlatform
 from watchlist.api.serializers import (
     ReviewSerializer, WatchlistSerializer, StreamPlatformSerializer)
 from watchlist.api.throttling import *
+from watchlist.api.pagination import (
+    StanderdCursorPagination,
+    StanderedPNumPagination,
+    StanderdLimitOffsetPagination
+)
 
 
 class UserReview(generics.ListAPIView):
@@ -138,6 +143,10 @@ class WatchListFilterAPIView(generics.ListAPIView):
     filter_fields = ['title', 'platform__name', ]
     search_fields = ['title', ]
     ordering_fields = ['avg_rating', ]
+
+    # pagination_class = StanderedPNumPagination
+    pagination_class = StanderdLimitOffsetPagination
+    # pagination_class = StanderdCursorPagination
 
 
 class WatchlistAPIView(APIView):
