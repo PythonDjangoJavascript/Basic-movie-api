@@ -8,6 +8,9 @@ from rest_framework_simplejwt.views import(
 
 from user.api import views
 
+
+app_name = 'user'
+
 urlpatterns = [
     path('login/', obtain_auth_token, name='login'),
     path('register/', views.user_registration_view, name='register'),
