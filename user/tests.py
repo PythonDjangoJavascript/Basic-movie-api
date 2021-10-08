@@ -8,6 +8,7 @@ from rest_framework.test import APITestCase, APIClient
 # All Static Variables
 REGISTRATION_URL = reverse('user:register')
 LOGIN_URL = reverse('user:login')
+LOGOUT_URL = reverse('user:logout')
 
 
 def create_user(**params):
@@ -94,22 +95,12 @@ class PublicUserAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("token", response.data)
 
-    def test_token_genaration_for_invalid_user(self):
-        """Test token invalit user token genaration"""
-
-        payload = {
-            "username": "invalid user",
-            "password": "123"
-        }
-        response = self.client.post(LOGIN_URL, payload)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_token_genaration_with_wrong_credintials(self):
         payload = {
             "username": "test",
             "password": "123"
         }
+        create_user(**payload)
         wrong_payload = {
             "username": "test",
             "password": "wrongpassword"
@@ -118,8 +109,27 @@ class PublicUserAPITests(APITestCase):
             "username": "test",
             "password": ""
         }
-        response = self.client.post(LOGIN_URL, wrong_payload)
+        response = self.client.post(LOGIN_URL, payload)
+        response1 = self.client.post(LOGIN_URL, wrong_payload)
         response2 = self.client.post(LOGIN_URL, invalid_payload)
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response1.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class PrivatUserAPITests(APITestCase):
+    """Test all user related endpoints that require authentication"""
+
+    def setUp(self):
+        payload = {
+            "username": "test logout",
+            "password": "superSecretPassword123"
+        }
+        self.user = create_user(**payload)
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_logout(self):
+        response = self.client.post(LOGOUT_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
