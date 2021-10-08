@@ -14,7 +14,6 @@ def user_registration_view(request):
     if request.method == 'POST':
         serialized_data = UserSerializer(data=request.data)
 
-        print(request.data)
         if serialized_data.is_valid():
             user = serialized_data.save()
             # token = Token.objects.get_or_create(user=user)
