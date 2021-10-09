@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 
-from watchlist.models import StreamPlatform
+from watchlist.models import StreamPlatform, WatchList, Review
 from watchlist.api.serializers import StreamPlatformSerializer
 
 
@@ -48,6 +48,31 @@ def sample_movie_platform(**params):
     return StreamPlatform.objects.create(**default)
 
 
+def create_movie(platform, **params):
+    """Add a new movie in watchlist database"""
+
+    default = {
+        "platform": platform,
+        "title": "The Test Movie",
+        "storyline": "The quick brown fox jumps over the lazy dog"
+    }
+    default.update(params)
+    return WatchList.objects.create(**default)
+
+
+def create_review(reviewer, movie, **params):
+    """Create a new review to an individual movie"""
+
+    default = {
+        "review_user": reviewer,
+        "watchlist": movie,
+        "rating": 5,
+        "message": "Test Review"
+    }
+    default.update(params)
+    return Review.objects.create(**default)
+
+
 class StearmPlatformTests(APITestCase):
     """Tests Stream Platform api endpoints"""
 
@@ -58,7 +83,7 @@ class StearmPlatformTests(APITestCase):
         self.token = create_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
-        sample_movie_platform()
+        self.platform = sample_movie_platform()
 
     def test_platform_creat_success(self):
         """Test Admin user can create new platform"""
@@ -100,3 +125,21 @@ class StearmPlatformTests(APITestCase):
 
         response = self.client.get(STREAM_PLATFORM)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_stream_platform_detail_get(self):
+        """Test Platform detila retrieve endpoint wroks"""
+
+        response = self.client.get(
+            reverse('stream-detail', args=(self.platform.id,)))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(StreamPlatform.objects.all().count(), 1)
+        self.assertEqual(StreamPlatform.objects.get().name, self.platform.name)
+
+
+# NOT TESTING WATCHLIST API END POINTS AS ALL TESTS WILL BE SAME TO PLATFORM
+
+
+class ReviewTests(APITestCase):
+    """Test Review Endpoints"""
+    pass
