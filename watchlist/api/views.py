@@ -284,7 +284,9 @@ class StreamPlatformAPIView(APIView):
 
         if serialized_data.is_valid():
             serialized_data.save()
-            return Response(serialized_data.data)
+            return Response(
+                serialized_data.data, status=status.HTTP_201_CREATED
+            )
         return Response(
             serialized_data.errors, status=status.HTTP_400_BAD_REQUEST
         )
