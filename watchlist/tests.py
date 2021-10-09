@@ -84,3 +84,19 @@ class StearmPlatformTests(APITestCase):
         serialized_platforms = StreamPlatformSerializer(
             all_platform, many=True)
         self.assertIn(response.data, serialized_platforms.data)
+
+    def test_normal_user_cant_create_platform(self):
+        payload = {
+            "name": "Amazon Prime",
+            "about": "Movie Hosting site",
+            "website": "https://amazoneprimce.com/"
+        }
+
+        response = self.client.post(STREAM_PLATFORM, payload)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_stream_platform_list_endpont(self):
+        """Test normal user can access all streaming platforms"""
+
+        response = self.client.get(STREAM_PLATFORM)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
