@@ -159,7 +159,7 @@ class ReviewTests(APITestCase):
         self.movie = create_movie(self.platform)
         self.review = create_review(self.user, self.movie)
 
-    def test_get_moview_reviews_list_workd(self):
+    def test_get_movie_reviews_list_works(self):
         """Test Get review list for perticular review works"""
 
         response = self.client.get(
@@ -184,3 +184,42 @@ class ReviewTests(APITestCase):
             reverse("movie-reviews", args=(new_movie.id,)), payload)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_review_create_unauthenitcated_user(self):
+
+        # remove token from header section
+        self.client.credentials()
+        new_movie = create_movie(self.platform)
+
+        payload = {
+            "user": self.user,
+            "rating": 4,
+            "message": "Test Review Two"
+        }
+
+        response = self.client.post(
+            reverse("movie-reviews", args=(new_movie.id,)), payload)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_retrieve_review_detail(self):
+        """Test review detail retieve endpoin works"""
+
+        response = self.client.get(
+            reverse("review-detail", args=(self.review.id, )))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("rating", response.data)
+
+    def test_review_update_works(self):
+
+        payload = {
+            "rating": 5,
+            "message": "Review Updated for test"
+        }
+
+        response = self.client.put(
+            reverse("review-detail", args=(self.review.id,)), payload)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('Review Updated for test', response.data["message"])
