@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 
 from watchlist.models import StreamPlatform, WatchList, Review
-from watchlist.api.serializers import StreamPlatformSerializer
+from watchlist.api.serializers import ReviewSerializer, StreamPlatformSerializer
 
 
 # All Endpoints
@@ -26,11 +26,14 @@ def create_user(**params):
 
     # if user is super user
     if params.get("is_superuser"):
-        get_user_model().objects.create_superuser(**default)
+        user = get_user_model().objects.create_superuser(**default)
     else:
-        get_user_model().objects.create_user(**default)
+        user = get_user_model().objects.create_user(**default)
 
-    return Token.objects.get(user__username=default["username"])
+    return {
+        "token": Token.objects.get(user__username=default["username"]),
+        "user": user
+    }
 
 
 def sample_movie_platform(**params):
@@ -80,7 +83,7 @@ class StearmPlatformTests(APITestCase):
         self.client = APIClient()
 
         # create a user and set the user token in the header section
-        self.token = create_user()
+        self.token = create_user().get("token")
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
         self.platform = sample_movie_platform()
@@ -93,7 +96,7 @@ class StearmPlatformTests(APITestCase):
             username="Admin",
             is_staff=True,
             is_superuser=True
-        )
+        ).get("token")
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + admin_token.key)
 
         payload = {
@@ -142,4 +145,42 @@ class StearmPlatformTests(APITestCase):
 
 class ReviewTests(APITestCase):
     """Test Review Endpoints"""
-    pass
+
+    def setUp(self) -> None:
+        self.client = APIClient()
+
+        user_info = create_user()
+        self.user = user_info.get("user")
+        self.token = user_info.get("token")
+
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+        self.platform = sample_movie_platform()
+        self.movie = create_movie(self.platform)
+        self.review = create_review(self.user, self.movie)
+
+    def test_get_moview_reviews_list_workd(self):
+        """Test Get review list for perticular review works"""
+
+        response = self.client.get(
+            reverse('movie-reviews', args=(self.movie.id, )))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        serialized_reivews = ReviewSerializer(response.data, many=True)
+        self.assertEqual(response.data, serialized_reivews.data)
+
+    def test_reivew_create(self):
+        """Test user can create review"""
+
+        # creating new movie as logged user has already reviewed self.movie
+        new_movie = create_movie(self.platform)
+
+        payload = {
+            "rating": 4,
+            "message": "Test Review Two"
+        }
+
+        response = self.client.post(
+            reverse("movie-reviews", args=(new_movie.id,)), payload)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
